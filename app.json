@@ -56,20 +56,10 @@
       "required": false,
       "value": "false"
     },
-    "ANTI_DELETE": {
-      "description": "Enable anti-delete feature (true/false)",
-      "required": false,
-      "value": "true"
-    },
     "AUTO_STATUS_SEEN": {
       "description": "Enable bot to view statuses (true/false)",
       "required": false,
       "value": "true"
-    },
-    "AUTO_STATUS_REACT": {
-      "description": "Enable bot to reply after viewing a status (true/false)",
-      "required": false,
-      "value": "false"
     },
     "AUTO_BLOCK": {
       "description": "Enable bot to auto-block specific numbers (true/false)",
