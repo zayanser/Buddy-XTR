@@ -1,0 +1,74 @@
+import config from '../../config.cjs';
+
+const privacyCommand = async (m, gss) => {
+    const prefix = config.PREFIX;
+    const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(' ')[0].toLowerCase() : '';
+    const text = m.body.slice(prefix.length + cmd.length).trim();
+
+    if (cmd === 'privacy') {
+        try {
+            // Available privacy settings and options
+            const privacySettings = {
+                'last': ['all', 'contacts', 'none'], // Last seen
+                'profile': ['all', 'contacts', 'none'], // Profile photo
+                'status': ['all', 'contacts', 'none'], // Status
+                'readreceipts': ['all', 'none'], // Read receipts
+                'groups': ['all', 'contacts', 'none'], // Groups add
+                'online': ['all', 'contacts', 'none'] // Online status
+            };
+
+            // Check current privacy settings
+            if (!text || text.toLowerCase() === 'check') {
+                let response = '🔐 *Current Privacy Settings* 🔐\n\n';
+                
+                // Note: Actual implementation may vary based on your WhatsApp library
+                // This is a placeholder - you'll need to replace with actual methods
+                const currentSettings = await gss.getPrivacySettings();
+                
+                for (const [setting, value] of Object.entries(currentSettings)) {
+                    response += `*${setting.toUpperCase()}*: ${value}\n`;
+                }
+                
+                response += `\nTo change settings, use: *${prefix}privacy <setting> <value>*\n`;
+                response += `Example: *${prefix}privacy last contacts*\n`;
+                response += `Available settings: ${Object.keys(privacySettings).join(', ')}`;
+                
+                await m.reply(response);
+                await m.React("ℹ️");
+                return;
+            }
+
+            // Handle setting changes
+            const [setting, value] = text.toLowerCase().split(' ');
+            
+            // Validate setting
+            if (!privacySettings[setting]) {
+                await m.reply(`❌ Invalid setting. Available settings:\n${Object.keys(privacySettings).join(', ')}`);
+                await m.React("❌");
+                return;
+            }
+
+            // Validate value
+            if (!value || !privacySettings[setting].includes(value)) {
+                await m.reply(`❌ Invalid value for ${setting}. Available options: ${privacySettings[setting].join(', ')}`);
+                await m.React("❌");
+                return;
+            }
+
+            // Update privacy setting
+            // Note: Actual implementation may vary based on your WhatsApp library
+            // This is a placeholder - you'll need to replace with actual methods
+            await gss.setPrivacySettings(setting, value);
+            
+            await m.reply(`✅ Successfully updated *${setting}* to *${value}*`);
+            await m.React("✅");
+
+        } catch (error) {
+            console.error('Error in privacy command:', error);
+            await m.reply('❌ Error processing privacy command. Please try again later.');
+            await m.React("❌");
+        }
+    }
+};
+
+export default privacyCommand;

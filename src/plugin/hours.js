@@ -1,0 +1,59 @@
+import pkg from '@whiskeysockets/baileys';
+import config from '../../config.cjs';
+const { generateWAMessageFromContent, proto } = pkg;
+
+const validCommands = ['alive', 'runtime', 'uptime'];
+
+const alive = async (m, Matrix) => {
+  try {
+    const prefix = config.PREFIX || '!'; // Fallback prefix if not in config
+    const text = m.body || m.message?.conversation || m.message?.extendedTextMessage?.text || '';
+    
+    // Check if message starts with prefix and is a valid command
+    if (!text.startsWith(prefix)) return;
+    
+    const command = text.slice(prefix.length).trim().split(' ')[0].toLowerCase();
+    if (!validCommands.includes(command)) return;
+
+    // Calculate uptime
+    const uptimeSeconds = process.uptime();
+    const days = Math.floor(uptimeSeconds / (24 * 3600));
+    const hours = Math.floor((uptimeSeconds % (24 * 3600)) / 3600);
+    const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+    const seconds = Math.floor(uptimeSeconds % 60);
+
+    // Create the response message
+    const responseText = `╭────┈┈━═──━┈⊷
+┇ *Reply to ${prefix}${command}*
+┇
+┇ 🟢 *Buddy is alive and running!*
+┇
+┇ 𝓤𝓟𝓣𝓘𝓜𝓔 𝓘𝓝𝓕𝓞
+┇ 🤖 *${days} Day${days !== 1 ? 's' : ''}*
+┇ 🚀 *${hours} Hour${hours !== 1 ? 's' : ''}*
+┇ 📡 *${minutes} Minute${minutes !== 1 ? 's' : ''}*
+┇ 📴 *${seconds} Second${seconds !== 1 ? 's' : ''}*
+╰─────┈━═──━┈⊷`;
+
+    // Prepare the message
+    const message = {
+      text: responseText,
+      mentions: [m.sender],
+      contextInfo: {
+        mentionedJid: [m.sender],
+        stanzaId: m.key.id,
+        participant: m.sender,
+        quotedMessage: {
+          conversation: text
+        }
+      }
+    };
+
+    // Send the message
+    await Matrix.sendMessage(m.from, message, { quoted: m });
+  } catch (error) {
+    console.error('Error in alive command:', error);
+  }
+};
+
+export default alive;
